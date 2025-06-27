@@ -214,5 +214,24 @@
       showRandomQuote();
     }
   </script>
+<!-- Filter dropdown -->
+<select id="categoryFilter" onchange="filterQuotes()">
+  <option value="all">All Categories</option>
+</select>
+
+<!-- Quote display -->
+<div id="quoteDisplay">Your quote will appear here...</div>
+<button id="newQuote">Show New Quote</button>
+
+<!-- Notification -->
+<div id="notification" style="margin-top: 1rem; color: green;"></div>
+
+<!-- Import/Export -->
+<input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+<button id="exportBtn">Export Quotes</button>
+
+<!-- Script -->
+<script src="script.js"></script>
+
 </body>
 </html>

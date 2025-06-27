@@ -2,7 +2,32 @@ let quotes = [];
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const exportBtn = document.getElementById("exportBtn");
-const categoryFilter = document.getElementById("categoryFilter"); // ✅ Explicitly defined
+const categoryFilter = document.getElementById("categoryFilter");
+const notification = document.getElementById("notification");
+
+// ---------------------------
+// Initialization
+// ---------------------------
+
+loadQuotes();
+createAddQuoteForm();
+populateCategories();
+setupManualSyncButton();
+
+const last = sessionStorage.getItem("lastQuote");
+if (last) {
+  const q = JSON.parse(last);
+  quoteDisplay.textContent = `"${q.text}" - ${q.category}`;
+} else {
+  showRandomQuote();
+}
+
+// Periodic sync every 30 seconds
+setInterval(syncWithServer, 30000);
+
+// ---------------------------
+// Local Quote Handling
+// ---------------------------
 
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
@@ -54,7 +79,7 @@ function addQuote() {
   if (text && category) {
     quotes.push({ text, category });
     saveQuotes();
-    populateCategories(); // ✅ Update dropdown
+    populateCategories();
     textInput.value = "";
     categoryInput.value = "";
     alert("Quote added!");
@@ -62,6 +87,10 @@ function addQuote() {
     alert("Please enter both a quote and a category.");
   }
 }
+
+// ---------------------------
+// Dynamic Form and Filter
+// ---------------------------
 
 function createAddQuoteForm() {
   const container = document.createElement("div");
@@ -87,7 +116,6 @@ function createAddQuoteForm() {
   document.body.appendChild(container);
 }
 
-// ✅ Define and export this function
 function populateCategories() {
   const selected = localStorage.getItem("selectedCategory") || "all";
   const categories = [...new Set(quotes.map(q => q.category))];
@@ -107,6 +135,12 @@ function filterQuotes() {
   localStorage.setItem("selectedCategory", selected);
   showRandomQuote();
 }
+
+window.filterQuotes = filterQuotes; // make accessible from HTML onchange
+
+// ---------------------------
+// JSON Import/Export
+// ---------------------------
 
 function exportToJsonFile() {
   const data = JSON.stringify(quotes, null, 2);
@@ -130,7 +164,7 @@ function importFromJsonFile(event) {
         saveQuotes();
         populateCategories();
         showRandomQuote();
-        alert("Quotes imported successfully!");
+        showNotification("Quotes imported successfully!");
       } else {
         alert("Invalid format. JSON must be an array.");
       }
@@ -141,19 +175,65 @@ function importFromJsonFile(event) {
   reader.readAsText(event.target.files[0]);
 }
 
-// ✅ Initialization
+// ---------------------------
+// Server Sync Simulation
+// ---------------------------
+
+async function fetchServerQuotes() {
+  // Simulated "server" quote list
+  return [
+    { text: "Knowledge is power.", category: "Wisdom" },
+    { text: "Code is like humor. When you have to explain it, it’s bad.", category: "Tech" },
+    { text: "Stay hungry. Stay foolish.", category: "Motivation" }
+  ];
+}
+
+async function syncWithServer() {
+  try {
+    const serverQuotes = await fetchServerQuotes();
+    let localChanged = false;
+    const localTexts = quotes.map(q => q.text.toLowerCase());
+
+    for (const serverQuote of serverQuotes) {
+      if (!localTexts.includes(serverQuote.text.toLowerCase())) {
+        quotes.push(serverQuote); // Server wins
+        localChanged = true;
+      }
+    }
+
+    if (localChanged) {
+      saveQuotes();
+      populateCategories();
+      showNotification("Quotes synced with server. Server changes applied.");
+    } else {
+      showNotification("Already up to date with server.");
+    }
+  } catch (error) {
+    showNotification("Failed to sync with server.");
+    console.error("Sync error:", error);
+  }
+}
+
+function setupManualSyncButton() {
+  const manualSyncBtn = document.createElement("button");
+  manualSyncBtn.textContent = "Sync Now";
+  manualSyncBtn.style.marginTop = "1rem";
+  manualSyncBtn.onclick = syncWithServer;
+  document.body.appendChild(manualSyncBtn);
+}
+
+// ---------------------------
+// Notifications
+// ---------------------------
+
+function showNotification(message) {
+  notification.textContent = message;
+  setTimeout(() => notification.textContent = "", 5000);
+}
+
+// ---------------------------
+// Event Listeners
+// ---------------------------
+
 newQuoteBtn.addEventListener("click", showRandomQuote);
 exportBtn.addEventListener("click", exportToJsonFile);
-window.filterQuotes = filterQuotes; // so it works from HTML onchange
-
-loadQuotes();
-createAddQuoteForm();
-populateCategories();
-
-const last = sessionStorage.getItem("lastQuote");
-if (last) {
-  const q = JSON.parse(last);
-  quoteDisplay.textContent = `"${q.text}" - ${q.category}`;
-} else {
-  showRandomQuote();
-}
