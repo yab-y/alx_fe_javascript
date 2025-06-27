@@ -12,7 +12,7 @@ const notification = document.getElementById("notification");
 loadQuotes();
 createAddQuoteForm();
 populateCategories();
-setupManualSyncButton();
+setupManualSyncButtons();
 
 const last = sessionStorage.getItem("lastQuote");
 if (last) {
@@ -136,7 +136,7 @@ function filterQuotes() {
   showRandomQuote();
 }
 
-window.filterQuotes = filterQuotes; // make accessible from HTML onchange
+window.filterQuotes = filterQuotes; // for HTML <select onchange>
 
 // ---------------------------
 // JSON Import/Export
@@ -176,7 +176,7 @@ function importFromJsonFile(event) {
 }
 
 // ---------------------------
-// Server Sync (JSONPlaceholder)
+// Server Sync (GET + POST)
 // ---------------------------
 
 async function fetchQuotesFromServer() {
@@ -184,13 +184,10 @@ async function fetchQuotesFromServer() {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
     const data = await response.json();
 
-    // Convert first few posts to quote format
-    const quotesFromServer = data.slice(0, 5).map(post => ({
+    return data.slice(0, 5).map(post => ({
       text: post.title,
       category: "Imported"
     }));
-
-    return quotesFromServer;
   } catch (error) {
     console.error("Failed to fetch from server:", error);
     return [];
@@ -200,35 +197,63 @@ async function fetchQuotesFromServer() {
 async function syncWithServer() {
   try {
     const serverQuotes = await fetchQuotesFromServer();
-    let localChanged = false;
+    let updated = false;
     const localTexts = quotes.map(q => q.text.toLowerCase());
 
-    for (const serverQuote of serverQuotes) {
-      if (!localTexts.includes(serverQuote.text.toLowerCase())) {
-        quotes.push(serverQuote); // Server wins
-        localChanged = true;
+    for (const sq of serverQuotes) {
+      if (!localTexts.includes(sq.text.toLowerCase())) {
+        quotes.push(sq);
+        updated = true;
       }
     }
 
-    if (localChanged) {
+    if (updated) {
       saveQuotes();
       populateCategories();
-      showNotification("Quotes synced with server. Server changes applied.");
+      showNotification("Quotes synced from server.");
     } else {
-      showNotification("Already up to date with server.");
+      showNotification("No new server quotes.");
     }
   } catch (error) {
-    showNotification("Failed to sync with server.");
-    console.error("Sync error:", error);
+    showNotification("Sync from server failed.");
+    console.error(error);
   }
 }
 
-function setupManualSyncButton() {
-  const manualSyncBtn = document.createElement("button");
-  manualSyncBtn.textContent = "Sync Now";
-  manualSyncBtn.style.marginTop = "1rem";
-  manualSyncBtn.onclick = syncWithServer;
-  document.body.appendChild(manualSyncBtn);
+async function syncQuotes() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quotes)
+    });
+
+    if (response.ok) {
+      showNotification("Quotes successfully synced to the server (simulated).");
+    } else {
+      showNotification("Failed to sync to server.");
+    }
+  } catch (error) {
+    showNotification("Error syncing to server.");
+    console.error("POST sync error:", error);
+  }
+}
+
+function setupManualSyncButtons() {
+  const syncBtn = document.createElement("button");
+  syncBtn.textContent = "Sync Now (GET)";
+  syncBtn.style.marginTop = "1rem";
+  syncBtn.onclick = syncWithServer;
+
+  const pushBtn = document.createElement("button");
+  pushBtn.textContent = "Push to Server (POST)";
+  pushBtn.style.marginLeft = "1rem";
+  pushBtn.onclick = syncQuotes;
+
+  document.body.appendChild(syncBtn);
+  document.body.appendChild(pushBtn);
 }
 
 // ---------------------------
