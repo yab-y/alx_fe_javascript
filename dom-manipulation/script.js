@@ -176,22 +176,30 @@ function importFromJsonFile(event) {
 }
 
 // ---------------------------
-// Server Sync Simulation
+// Server Sync (JSONPlaceholder)
 // ---------------------------
 
-// ✅ Required by your task
 async function fetchQuotesFromServer() {
-  // Simulated server response
-  return [
-    { text: "Knowledge is power.", category: "Wisdom" },
-    { text: "Code is like humor. When you have to explain it, it’s bad.", category: "Tech" },
-    { text: "Stay hungry. Stay foolish.", category: "Motivation" }
-  ];
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const data = await response.json();
+
+    // Convert first few posts to quote format
+    const quotesFromServer = data.slice(0, 5).map(post => ({
+      text: post.title,
+      category: "Imported"
+    }));
+
+    return quotesFromServer;
+  } catch (error) {
+    console.error("Failed to fetch from server:", error);
+    return [];
+  }
 }
 
 async function syncWithServer() {
   try {
-    const serverQuotes = await fetchQuotesFromServer(); // ✅ Use required function
+    const serverQuotes = await fetchQuotesFromServer();
     let localChanged = false;
     const localTexts = quotes.map(q => q.text.toLowerCase());
 
