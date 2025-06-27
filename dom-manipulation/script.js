@@ -5,10 +5,7 @@ const exportBtn = document.getElementById("exportBtn");
 const categoryFilter = document.getElementById("categoryFilter");
 const notification = document.getElementById("notification");
 
-// ---------------------------
 // Initialization
-// ---------------------------
-
 loadQuotes();
 createAddQuoteForm();
 populateCategories();
@@ -25,10 +22,7 @@ if (last) {
 // Periodic sync every 30 seconds
 setInterval(syncWithServer, 30000);
 
-// ---------------------------
 // Local Quote Handling
-// ---------------------------
-
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   const storedFilter = localStorage.getItem("selectedCategory");
@@ -88,10 +82,7 @@ function addQuote() {
   }
 }
 
-// ---------------------------
 // Dynamic Form and Filter
-// ---------------------------
-
 function createAddQuoteForm() {
   const container = document.createElement("div");
   container.style.marginTop = "1.5rem";
@@ -135,13 +126,9 @@ function filterQuotes() {
   localStorage.setItem("selectedCategory", selected);
   showRandomQuote();
 }
+window.filterQuotes = filterQuotes;
 
-window.filterQuotes = filterQuotes; // for HTML <select onchange>
-
-// ---------------------------
 // JSON Import/Export
-// ---------------------------
-
 function exportToJsonFile() {
   const data = JSON.stringify(quotes, null, 2);
   const blob = new Blob([data], { type: "application/json" });
@@ -175,10 +162,7 @@ function importFromJsonFile(event) {
   reader.readAsText(event.target.files[0]);
 }
 
-// ---------------------------
 // Server Sync (GET + POST)
-// ---------------------------
-
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
@@ -210,7 +194,7 @@ async function syncWithServer() {
     if (updated) {
       saveQuotes();
       populateCategories();
-      showNotification("Quotes synced from server.");
+      showNotification("Quotes synced with server!");
     } else {
       showNotification("No new server quotes.");
     }
@@ -256,18 +240,12 @@ function setupManualSyncButtons() {
   document.body.appendChild(pushBtn);
 }
 
-// ---------------------------
 // Notifications
-// ---------------------------
-
 function showNotification(message) {
   notification.textContent = message;
   setTimeout(() => notification.textContent = "", 5000);
 }
 
-// ---------------------------
 // Event Listeners
-// ---------------------------
-
 newQuoteBtn.addEventListener("click", showRandomQuote);
 exportBtn.addEventListener("click", exportToJsonFile);
