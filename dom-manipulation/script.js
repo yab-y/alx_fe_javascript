@@ -179,8 +179,9 @@ function importFromJsonFile(event) {
 // Server Sync Simulation
 // ---------------------------
 
-async function fetchServerQuotes() {
-  // Simulated "server" quote list
+// ✅ Required by your task
+async function fetchQuotesFromServer() {
+  // Simulated server response
   return [
     { text: "Knowledge is power.", category: "Wisdom" },
     { text: "Code is like humor. When you have to explain it, it’s bad.", category: "Tech" },
@@ -190,7 +191,7 @@ async function fetchServerQuotes() {
 
 async function syncWithServer() {
   try {
-    const serverQuotes = await fetchServerQuotes();
+    const serverQuotes = await fetchQuotesFromServer(); // ✅ Use required function
     let localChanged = false;
     const localTexts = quotes.map(q => q.text.toLowerCase());
 
