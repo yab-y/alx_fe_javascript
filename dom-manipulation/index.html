@@ -4,24 +4,81 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Quote Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    #quoteDisplay {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: #f4f4f4;
+      border-left: 5px solid #007acc;
+      font-size: 1.2rem;
+    }
+    button {
+      margin: 0.25rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+    input {
+      margin: 0.25rem;
+      padding: 0.5rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Display quote -->
-  <div id="quoteDisplay"></div>
+  <!-- Display Random Quote -->
+  <div id="quoteDisplay">Your quote will appear here...</div>
   <button id="newQuote">Show New Quote</button>
 
-  <!-- Add new quote form -->
-  <div style="margin-top: 20px;">
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button id="addQuoteBtn">Add Quote</button>
-  </div>
+  <!-- Category buttons will be inserted here -->
+  <div id="categoryContainer" style="margin-top: 1rem;"></div>
 
-  <!-- Container for category buttons -->
-  <div id="categoryContainer" style="margin-top: 20px;"></div>
+  <!-- All other elements (form, import/export UI) will be created dynamically -->
+  
+  <!-- Script -->
+  <script>
+    let quotes = [];
+    let currentCategory = null;
 
-  <script src="script.js"></script>
-</body>
-</html>
+    const quoteDisplay = document.getElementById("quoteDisplay");
+    const newQuoteBtn = document.getElementById("newQuote");
+    const categoryContainer = document.getElementById("categoryContainer");
+
+    function loadQuotes() {
+      const stored = localStorage.getItem("quotes");
+      if (stored) {
+        quotes = JSON.parse(stored);
+      } else {
+        quotes = [
+          { text: "The only limit is your mind.", category: "Motivation" },
+          { text: "Simplicity is the soul of efficiency.", category: "Tech" },
+          { text: "Art is not what you see, but what you make others see.", category: "Art" }
+        ];
+        saveQuotes();
+      }
+    }
+
+    function saveQuotes() {
+      localStorage.setItem("quotes", JSON.stringify(quotes));
+    }
+
+    function saveLastQuote(quote) {
+      sessionStorage.setItem("lastQuote", JSON.stringify(quote));
+    }
+
+    function showRandomQuote() {
+      const filtered = currentCategory
+        ? quotes.filter(q => q.category.toLowerCase() === currentCategory.toLowerCase())
+        : quotes;
+
+      if (filtered.length === 0) {
+        quoteDisplay.textContent = "No quotes available in this category.";
+        return;
+      }
+
+      const randomQuote = filtered[Math.floor(Math.ran]()
+
